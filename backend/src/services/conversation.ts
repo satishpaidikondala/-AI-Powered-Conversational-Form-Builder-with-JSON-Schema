@@ -10,7 +10,7 @@ export class ConversationManager {
       history: [],
       currentSchema: null,
       version: 0,
-      formId: uuidv4(),
+      formId: id,
       createdAt: Date.now(),
     });
     return id;
