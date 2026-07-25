@@ -130,7 +130,7 @@ function buildSchemaFromPrompt(prompt: string): JSONSchema7 {
   return schema;
 }
 
-function checkAmbiguity(prompt: string): string[] | null {
+function checkAmbiguity(prompt: string, hasContext: boolean = false): string[] | null {
   const normalized = prompt.toLowerCase().trim();
 
   if (
@@ -158,8 +158,8 @@ function checkAmbiguity(prompt: string): string[] | null {
     ];
   }
 
-  // Check for very short/vague prompts
-  if (extractKeywords(prompt).length < 2) {
+  // Check for very short/vague prompts (only for new conversations)
+  if (!hasContext && extractKeywords(prompt).length < 2) {
     return [
       'What type of form would you like to create?',
       'What fields should be included in the form?',
@@ -199,8 +199,9 @@ export class MockLLMService {
     currentSchema?: JSONSchema7 | null,
     mockFailuresRemaining?: number
   ): Promise<{ schema?: JSONSchema7; clarification?: string[] }> {
-    // Check for ambiguity
-    const questions = checkAmbiguity(prompt);
+    // Check for ambiguity (skip for continuing conversations)
+    const hasContext = currentSchema != null && history.length > 0;
+    const questions = checkAmbiguity(prompt, hasContext);
     if (questions) {
       return { clarification: questions };
     }
